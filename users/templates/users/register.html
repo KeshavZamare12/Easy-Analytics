@@ -1,0 +1,65 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center">Register</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.name == 'password' or field.name == 'password_confirm' %}
+                <div class="input-group">
+                    <input type="password" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}"
+                        value="{{ field.value|default:'' }}"
+                        placeholder="{% if field.errors %}{% for error in field.errors %}{% if error != 'This field is required.' %}{{ error }}{% endif %}{% endfor %}{% endif %}"
+                        {% if field.errors %}style="border-color: red;" {% endif %}>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-secondary"
+                            onclick="togglePasswordVisibility('{{ field.id_for_label }}', this)">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <input type="{{ field.field.widget.attrs.type }}" class="form-control" id="{{ field.id_for_label }}"
+                    name="{{ field.name }}" value="{{ field.value|default:'' }}"
+                    placeholder="{% if field.errors %}{% for error in field.errors %}{% if error != 'This field is required.' %}{{ error }}{% endif %}{% endfor %}{% endif %}"
+                    {% if field.errors %}style="border-color: red;" {% endif %}>
+                {% endif %}
+                {% if field.errors %}
+                <div class="text-danger">
+                    {% for error in field.errors %}
+                    {% if error != "This field is required." %}
+                    {{ error }}
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility(inputId, button) {
+        var input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            button.innerHTML = '<i class="fa-regular fa-eye-slash"></i>'; // Change to eye-slash icon
+        } else {
+            input.type = "password";
+            button.innerHTML = '<i class="fa-regular fa-eye"></i>'; // Change back to eye icon
+        }
+    }
+</script>
+
+<!-- Add Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+{% endblock %}

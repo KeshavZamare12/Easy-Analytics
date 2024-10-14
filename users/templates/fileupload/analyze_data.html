@@ -1,0 +1,213 @@
+{% extends 'users/home.html' %}
+{% block title %}Analyze Data{% endblock %}
+{% block content %}
+{% if count1 %}
+<div class="container mt-5">
+    <h2>Modify Your Data</h2>
+    <div class="text-center mt-4">
+        <a href="{% url 'upload_data' %}" class="btn btn-primary">Go to Upload</a>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-header text-center text-bg-warning">
+        <h3>Analyze Data</h3>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card-body overflow-auto">
+            <div class="form-group p-2" style="display: block;">
+                <div class="row">
+                    <div class="col-sm-4"><label>Select Method:<sup style="color:red;">*</sup></label></div>
+                    <div class="col-sm-8 scrollable bg-opacity-50 bg-success-subtle">
+                        <div class="row">
+                            {% for method in methods %}
+                            <div class="col-sm-4">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="selected_method"
+                                        id="method_{{ forloop.counter }}" value="{{ method }}" required
+                                        onchange="toggleFields()">
+                                    <label class="form-check-label" for="method_{{ forloop.counter }}">{{ method }}</label>
+                                </div>
+                            </div>
+                            {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                        </div>
+                        <div class="row">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descriptive Methods -->
+            <div id="descriptive_field" class="form-group p-2" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label for="descriptiveMethod">
+                            <h4>Methods:<sup style="color:red;">*</sup></h4>
+                        </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="descriptiveMethod" id="descriptive"
+                            class="form-control bg-primary-hover text-center bg-opacity-10 text-bg-info" onchange="toggleFields()">
+
+                            <option value="" selected>Select Method</option>
+                            <option value="0">Data Description (Quantitative data)</option>
+                            <option value="1">Data Description (Qualitative data)</option>
+                            <option value="2">Count of Unique Values per column</option>
+                            <option value="3">Correlation Matrix</option>
+                            <option value="4">See Unique values of specific column</option>
+                            <option value="5">Data Information</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnostic Methods -->
+            <div id="diagnostic_field" class="form-group p-2" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label for="diagnosticMethod">
+                            <h4>Methods:<sup style="color:red;">*</sup></h4>
+                        </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="diagnosticMethod" id="diagnostic"
+                            class="form-control bg-primary-hover text-center bg-opacity-10 text-bg-info">
+                            <option value="" selected>Select Method</option>
+                            <option value="1">Data Distribution Analysis</option>
+                            <option value="2">Comparative Analysis</option>
+                            <option value="3">Outlier Detection</option>
+                            <option value="4">Relationship Analysis</option>
+                            <option value="5">Missing Value Analysis</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictive Methods -->
+            <div id="predictive_field" class="form-group p-2" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label for="predictiveMethod">
+                            <h4>Methods:<sup style="color:red;">*</sup></h4>
+                        </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="predictiveMethod" id="predictive"
+                            class="form-control bg-primary-hover text-center bg-opacity-10 text-bg-info">
+                            <option value="" selected>Select Method</option>
+                            <option value="linear_regression">Linear Regression</option>
+                            <option value="logistic_regression">Logistic Regression</option>
+                            <option value="decision_tree">Decision Tree</option>
+                            <option value="random_forest">Random Forest</option>
+                            <option value="svm">Support Vector Machine</option>
+                            <option value="knn">K-Nearest Neighbors</option>
+                            <option value="neural_network">Neural Network</option>
+                            <option value="time_series">Time Series Forecasting</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unique Value Selection -->
+            <div id="unique_val_field" class="form-group p-2" style="display: none;">
+                <div class="row p-2">
+                    <div class="col-sm-4">
+                        <label for="unique_val">Select Column<sup style="color:red;">*</sup></label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="column_nm"
+                            class="form-control bg-primary-hover text-center bg-opacity-10 text-bg-info">
+                            <option value="" selected>Select Column<sup style="color:red;">*</sup></option>
+                            {% for column in columns %}
+                            <option value="{{ column }}">{{ column }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center form-group p-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    {% if searched_data %}
+    <div class="card-header bg-light">
+        <div class="row">
+            <div class="col-sm-8">
+                <h4>Searched Data:</h4>
+            </div>
+            <div class="col-sm-4">
+                <a href="{% url 'download_file' id=1 %}" class="btn btn-grd-primary float-end"><i
+                        class="fa fa-download"></i>Download</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">{{ searched_data|safe }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleFields() {
+        const selectedMethod = document.querySelector('input[name="selected_method"]:checked');
+        const descriptiveField = document.getElementById('descriptive_field');
+        const diagnosticField = document.getElementById('diagnostic_field');
+        const predictiveField = document.getElementById('predictive_field');
+        const uniqueValField = document.getElementById('unique_val_field');
+
+        // Reset visibility
+        descriptiveField.style.display = 'none';
+        diagnosticField.style.display = 'none';
+        predictiveField.style.display = 'none';
+        uniqueValField.style.display = 'none';
+
+        if (selectedMethod) {
+            if (selectedMethod.value.includes('Descriptive')) {
+                descriptiveField.style.display = 'block';
+                descriptiveField.querySelector('select').required = true;
+            }
+            else{
+                descriptiveField.style.display = 'none';
+                descriptiveField.querySelector('select').required = false;
+            }
+            if (selectedMethod.value.includes('Diagnostic')) {
+                diagnosticField.style.display = 'block';
+                diagnosticField.querySelector('select').required = true;
+            }
+            else {
+                diagnosticField.style.display = 'none';
+                diagnosticField.querySelector('select').required = false;
+
+            }
+            if (selectedMethod.value.includes('Predictive')) {
+                predictiveField.style.display = 'block';
+                predictiveField.querySelector('select').required = true;
+            }
+            else {
+                predictiveField.style.display = 'none';
+                predictiveField.querySelector('select').required = false;
+            }
+        }
+
+        // Show unique value field for specific descriptive method
+        const descriptiveMethodSelect = document.getElementById('descriptive');
+        if (descriptiveMethodSelect.value === '4') {
+            uniqueValField.style.display = 'block';
+            uniqueValField.querySelector('select').required = true; // Show unique value field
+        }
+        else{
+            uniqueValField.style.display='none';
+            uniqueValField.querySelector('select').required = false;
+        }
+    }
+</script>
+{% endif %}
+{% endblock %}

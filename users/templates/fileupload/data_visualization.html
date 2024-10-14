@@ -1,0 +1,198 @@
+{% extends 'users/home.html' %}
+{% block title %}Data Visualization{% endblock %}
+{% block content %}
+
+<div class="card mb-4">
+    <div class="card-header text-bg-danger text-center">
+        <h3>Upload Data and Select Plot Type</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-group">
+                <div class="row p-2">
+                    <div class="col-sm-4">
+                        <label for="plot_type">Select Plot Type:</label>
+                    </div>
+                <div class="col-sm-8 text-primary">
+                <select name="plot_type" id="plot_type" class="form-control text-center bg-primary-hover" required onchange="toggleFields(this.value)">
+                    <option value="" selected>Select a plot type</option>
+                    <option value="bar">Bar Plot</option>
+                    <option value="line">Line Plot</option>
+                    <option value="hist">Histogram</option>
+                    <option value="scatter">Scatter</option>
+                    <option value="pie">Pie chart</option>
+                    <option value="kde">Kde or density </option>
+                    <option value="box">Box plot</option>
+                </select>
+                </div>
+                </div>
+            </div>
+            <div class="form-group p-2" id="func_name" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label for="func_name">Function Name</label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="func_type" id="func_type" class="form-control bg-primary-hover text-center">
+                            <option value="">---select Method---</option>
+                            <option value="avg">average</option>
+                            <option value="count">count</option>
+                            <option value="sum">Sum</option>
+                            <option value="max">Max</option>
+                            <option value="min">Min</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ColumnsSelection" class="form-group p-2 text-bg-secondary" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-4"><label>Select Columns:<sup style="color:red;">*</sup></label></div>
+                    <div class="col-sm-8 scrollable bg-dark-hover">
+                        <div class="row">
+                            {% for column in columns %}
+                            <div class="col-sm-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="selected_columns" value="{{ column }}">
+                                    <label class="form-check-label">{{ column }}</label>
+                                </div>
+                            </div>
+                            {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                        </div>
+                        <div class="row">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <div id="unique_val_field" class="form-group p-2">
+                <div class="row ">
+                    <div class="col-sm-4">
+                        <label for="unique_val">select column </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="column_name" class="form-control bg-primary-hover text-center">
+                            <option value="">Select Method(x)</option>
+                            {% for column in columns %}
+                            <option value="{{ column }}">{{ column }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="unique_val_field2" class="form-group p-2" style="display: none;">
+                <div class="row ">
+                    <div class="col-sm-4">
+                        <label for="unique_val">select column </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <select name="column_name1" class="form-control bg-primary-hover text-center">
+                            <option value="">Select Method(y)</option>
+                            {% for column in columns %}
+                            <option value="{{ column }}">{{ column }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row text-center pt-4 ps-5 pe-5">
+            <button type="submit" class="btn btn-primary" >Generate Plot</button></div>
+        </form>
+    </div>
+</div>
+
+{% if plot_html %}
+<div class="card">
+    <div class="card-header">
+        <h5>Generated Plot</h5>
+    </div>
+    <div class="card-body text-center">
+        <div>{{ plot_html|safe }}</div>
+    </div>
+</div>
+{% elif error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+<div class="content">
+    <button class="btn btn-outline-primary bg-opacity-50 bg-alert" ><a href="{% url 'generate_plots' %}" onclick="generate_plot()">AutoGenerate Plots</a></button>
+    </div>
+    <div class="container-fluid" id="auto_plot_data" style="display:none;">
+    {%if plots%}
+    
+        {%for plot in plots%}
+        <div class="content mt-3">
+                {{plot|safe}}
+            
+        </div>
+        
+        {%endfor%}
+    {%endif%}
+    </div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        function toggleFields(plot_type) {
+                const columnSelection = document.getElementById('ColumnsSelection');
+                const unique_val_field2 = document.getElementById('unique_val_field2');
+                const unique_val_field = document.getElementById('unique_val_field');
+                const func_type=document.getElementById("func_name");
+
+                // Reset required attributes
+                const inputs = [columnSelection,unique_val_field,unique_val_field2];
+                inputs.forEach(field => {
+                    field.querySelectorAll('input, select').forEach(input => {
+                        input.required = false;
+                    });
+                    field.style.display = 'none'; // Hide all fields initially
+                });
+
+                if (plot_type === 'line') {
+                    columnSelection.style.display = 'block';
+                    columnSelection.querySelector('select').required = true;
+                }
+                else{
+                    columnSelection.style.display ='none';
+                if (['hist','pie','box'].includes(plot_type)) {
+                    unique_val_field.style.display = 'block';
+                    unique_val_field.querySelector('select').required=true;
+                    if (plot_type==='hist'){
+                        func_type.style.display='block';
+                    }
+                    else{
+                        func_type.style.display='none';
+                    }
+                    
+                } else {
+                    unique_val_field.style.display = 'block';
+                    unique_val_field.querySelector('select').required=true;
+                    unique_val_field2.style.display = 'block';
+                    unique_val_field2.querySelector('select').required=true;
+                }
+            }
+            }
+            function generate_plot(){
+            document.getElementById('auto_plot_data').style.display = 'block';
+            }
+    </script>
+{% endblock %}
+<!--
+<div class="form-group" style="display: none;">
+    <div class="row p-2">
+        <div class="col-sm-4 texts-left">
+            <label for="data">Select data Type:</label>
+        </div>
+        <div class="col-sm-8">
+            <select name="data" id="" class="form-control text-center" required>
+                <option value="" disabled selected>Select a data type</option>
+                <option value="">specific column</option>
+                <option value="line">Unique count values</option>
+                <option value="hist"></option>
+            </select>
+        </div>
+    </div>
+</div> -->

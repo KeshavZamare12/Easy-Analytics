@@ -1,0 +1,147 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block header %}
+<nav class="navbar navbar-expand-sm text-black bg-info" >
+    <div class="container-fluid">
+        <a class="navbar-brand float-left text-white bg-danger rounded-circle fw-bold" href="{% url 'home' %}">EASY ANALYTICS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"><i class="fas fa-bars" aria-hidden="true"></i></span>
+        </button>
+        <div class="collapse navbar-collapse  text-black-50" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="navbar-link" href="{% url 'home' %}">HOME</a>
+            </li>
+            <li class="nav-item">
+                <a class="navbar-link" href="{% url 'upload_data' %}">Exact/Upload DATA</a>
+            </li>
+            <li class="nav-item">
+                <a class="navbar-link" href="{% url 'modify_data' %}">DATA MODIFICATION</a>
+            </li>
+            <li class="nav-item">
+                <a class="navbar-link" href="{% url 'analyze_data' %}">DATA ANALYSIS</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'visualize_data' %}" class="navbar-link">DATA VISUALIZATION</a>
+            </li>
+        </ul>
+        
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item text-center">
+                    <p class="p-2 text-capitalize text-dark-emphasis"><b>Welcome
+                        <span>{{user.username}}!</b></span>
+                    </p>
+                    
+                </li>
+        <li class="nav-item dropdown align-content-lg-start" >
+            {% if user.is_authenticated %}
+            <a class="nav-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end float-end bg-info" aria-labelledby="navbarDropdown">
+                <SPAN>
+                    <img src="{{ profile.profile_pic.url }}" alt='Profile'
+                        style="width: 150px; height: 150px; border-radius: 50%;" class="img-fluid auto">
+                </SPAN>
+                <a class="dropdown-item bg-info" href="{% url 'view_profile' %}">View Profile</a>
+                <a class="dropdown-item bg-info" href="{% url 'edit_profile' %}">Edit Profile</a>
+                <div class="dropdown-divider bg-info"></div>
+                <a class="dropdown-item bg-info" href="{% url 'logout' %}">Logout</a>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="nav-link">Login</a>
+            {% endif %}
+        </li>
+
+            </ul>
+        </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+
+{% block content %}
+<div class="card">
+    <div class="card-header text-bg-warning text-center">
+        <h2 class="mb-0">Data Processing Essentials</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-center text-bg-info p-3">
+                        <h5 class="mb-0">Exact or Upload Data</h5>
+                    </div>
+                    <div class="card-body h-250">
+                        <p><strong>Description:</strong> The process of entering or importing data into a system for
+                            analysis.</p>
+                        <p><strong>Considerations:</strong> Data integrity, format compatibility, automation options.
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <center><a class=" btn btn-primary text-center" href="{% url 'upload_data' %}">Start</a></center>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header text-center text-bg-info p-3">
+                    <h5 class="mb-0">Transform and Load Data (ETL)</h5>
+                </div>
+                <div class="card-body h-250">
+                    <p><strong>Description:</strong> Extract data from sources, transform it for analysis, and load
+                        it into a database.</p>
+                    <p><strong>Key Steps:</strong> Extract, Transform, Load.</p>
+                </div>
+                <div class="card-footer">
+                    <center><a class=" btn btn-primary text-center" href="{% url 'modify_data' %}">Start</a></center>
+                </div>
+            </div>
+                
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-center text-bg-info p-3">
+                        <h5 class="mb-0">Data Analysis</h5>
+                    </div>
+                    <div class="card-body h-250">
+                        <p><strong>Description:</strong> Examine datasets to draw conclusions and inform decisions.</p>
+                        <p><strong>Key Techniques:</strong> Descriptive statistics, inferential statistics, predictive
+                            analytics.</p>
+                    </div>
+                    <div class="card-footer">
+                        <center><a class=" btn btn-primary text-center" href="{% url 'analyze_data' %}">Start</a></center>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header text-center text-bg-info p-3">
+                                        <h5 class="mb-0">Data Visualization</h5>
+                                    </div>
+                                    <div class="card-body h-250">
+                                        <p><strong>Description:</strong> Transform data into graphical representations to uncover
+                                            insights.</p>
+                                        <p><strong>Best Practices:</strong> Choose the right chart type, use color effectively, keep it
+                                            simple and clear.
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <center><a class=" btn btn-primary text-center" href="{% url 'visualize_data' %}">Start</a></center>
+                                    </div>
+                                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

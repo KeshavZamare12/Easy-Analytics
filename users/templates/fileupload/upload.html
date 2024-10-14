@@ -1,0 +1,98 @@
+{% extends 'users/home.html' %} <!-- Extend your base template -->
+{% block title %}Upload Data {% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header text-center text-bg-warning">
+        <h2>Upload File</h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="card-body">
+            {% csrf_token %} 
+            <div class="row">
+                <div class="col-sm-2">{{ form.file_type.label }}<sup style="color:red;">*</sup></div>
+                <div class="col-sm-4"> {{ form.file_type }}</div>
+                <div class="col-sm-2">{{ form.file.label }}<sup style="color:red;">*</sup></div>
+                <div class="col-sm-4"> {{ form.file }}</div>
+            </div>
+            <div id="sheet_field" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-2 p-2">
+                        {{ form.sheet_name.label }}<sup style="color:red;">*</sup>
+                    </div>
+                    <div class="col-sm-4">{{ form.sheet_name }}</div>
+                    {{ form.sheet_name.errors }} <!-- To show errors if any -->
+                </div>
+            </div>
+            <div id="key_field" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-2 p-2">
+                        {{ form.key_name.label }}<sup style="color:red;">*</sup>
+                    </div>
+                    <div class="col-sm-4">{{ form.key_name }}</div>
+                    {{ form.key_name.errors }} <!-- To show errors if any -->
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+
+<hr>
+
+<div class="card">
+    {% if data %}
+    <div class="card-header">
+        <div class="row">
+            <div class="col-sm-8">
+                <h3>Uploaded Data</h3>
+            </div>
+            <div class="col-sm-4 text-right">
+                <a href="{% url 'modify_data' %}" class="btn btn-primary">Data Modification</a>
+                <a href="{% url 'visualize_data' %}" class="btn btn-primary">Data Visualization</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body overflow-auto">
+        {{ data|safe }}
+    </div>
+    {%else %}
+    <div class=" card-body text-danger mt-3" style="font-size: 22px;">
+        {{ form.file.errors|first }}
+    </div>
+    {% endif %}
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const file_type = document.querySelector('select[name="file_type"]');
+        const sheet_field = document.getElementById('sheet_field');
+
+        function toggleFields() {
+            const selectedValue = file_type.value;
+            sheet_field.style.display = selectedValue === 'xlsx' ? 'block' : 'none';
+        
+        }
+
+        file_type.addEventListener('change', toggleFields);
+        toggleFields(); // Call on load to set initial visibility
+    });
+        document.addEventListener('DOMContentLoaded', function () {
+                const file_type = document.querySelector('select[name="file_type"]');
+                const sheet_field = document.getElementById('key_field');
+
+                function toggleFields() {
+                    const selectedValue = file_type.value;
+                    sheet_field.style.display = selectedValue === 'json' ? 'block' : 'none';
+
+                }
+
+                file_type.addEventListener('change', toggleFields);
+                toggleFields(); // Call on load to set initial visibility
+            });
+</script>
+
+{% endblock %}

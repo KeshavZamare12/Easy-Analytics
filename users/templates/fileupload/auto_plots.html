@@ -1,0 +1,89 @@
+<!-- myapp/templates/myapp/person_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Person List</h1>
+
+        <form method="GET" action="">
+            <div class="form-row align-items-end mb-3">
+                <div class="col-sm-2">
+                    <select name="entries" class="form-control" onchange="this.form.submit()">
+                        <option value="10" {% if entries_per_page == 10 %}selected{% endif %}>10 entries</option>
+                        <option value="25" {% if entries_per_page == 25 %}selected{% endif %}>25 entries</option>
+                        <option value="50" {% if entries_per_page == 50 %}selected{% endif %}>50 entries</option>
+                        <option value="100" {% if entries_per_page == 100 %}selected{% endif %}>100 entries</option>
+                    </select>
+                </div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="search" placeholder="Search by name" value="{{ query }}">
+                    <button type="submit" class="btn btn-primary mt-2">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                    <th>
+                        <a href="?search={{ query }}&sort={{ column }}&entries={{ entries_per_page }}">
+                            {{ column }}
+                            <span class="arrow">&#x25B2;&#x25BC;</span>
+                        </a>
+                    </th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for column in columns %}
+                    <th>
+                        <input type="text" class="form-control" placeholder="Search {{ column }}" onkeyup="filterTable(event, {{ loop.index0 }})">
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {{ people_html|safe }}
+            </tbody>
+        </table>
+
+        <div>
+            {% if page_obj.has_previous %}
+                <a href="?search={{ query }}&sort={{ sort_by }}&entries={{ entries_per_page }}&page=1">First</a>
+                <a href="?search={{ query }}&sort={{ sort_by }}&entries={{ entries_per_page }}&page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?search={{ query }}&sort={{ sort_by }}&entries={{ entries_per_page }}&page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?search={{ query }}&sort={{ sort_by }}&entries={{ entries_per_page }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterTable(event, columnIndex) {
+            const filterValue = event.target.value.toLowerCase();
+            const table = document.querySelector('table tbody');
+            const rows = table.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const cellValue = cells[columnIndex].textContent.toLowerCase();
+                if (cellValue.includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
